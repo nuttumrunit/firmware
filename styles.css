@@ -646,8 +646,8 @@ body:before{
 }
 /* CA readability */
 .contract-slot{
-  width:max-content;
-  min-width:0;
+  width:286px;
+  min-width:286px;
   height:34px;
   justify-content:flex-start;
   gap:10px;
@@ -665,13 +665,14 @@ body:before{
 .contract-slot i{display:none}
 .contract-slot code{
   min-width:0;
+  flex:1;
   color:#eee3da;
   font:600 9px/1 var(--mono);
   letter-spacing:.025em;
-  text-align:left;
+  text-align:center;
 }
 @media(max-width:820px){
-  .contract-slot{width:max-content;min-width:0}
+  .contract-slot{width:286px;min-width:286px}
   .contract-slot code{font-size:8px}
 }
 @media(max-width:600px){
