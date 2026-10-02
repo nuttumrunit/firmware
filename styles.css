@@ -699,3 +699,231 @@ body:before{
   }
   .header-actions{display:none}
 }
+/* 3D chip node system */
+.runtime-board{perspective:1200px}
+.hardware-ic{
+  width:142px;
+  height:76px;
+  min-height:0;
+  padding:11px 12px 10px;
+  overflow:visible;
+  border:1px solid #574239;
+  background:#0a0807;
+  box-shadow:4px 4px 0 #17100d;
+  isolation:isolate;
+}
+.hardware-ic:before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  top:50%;
+  right:-53px;
+  left:auto;
+  width:34px;
+  height:34px;
+  border:1px solid #f0a083;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.22),transparent 30%),
+    linear-gradient(315deg,#9c432e 0 42%,#e47a55 43% 100%);
+  box-shadow:
+    3px 3px 0 #703321,
+    7px 7px 0 #2b1811,
+    10px 10px 0 rgba(0,0,0,.45);
+  transform:translateY(-58%) rotate(45deg) skew(-3deg,-3deg);
+  pointer-events:none;
+}
+.hardware-ic:after{
+  content:"";
+  position:absolute;
+  z-index:3;
+  top:50%;
+  right:-42px;
+  left:auto;
+  width:12px;
+  height:12px;
+  border:1px solid #f5b092;
+  background:#17100d;
+  box-shadow:0 0 0 3px #c25b3d;
+  transform:translateY(-72%) rotate(45deg);
+  pointer-events:none;
+}
+.hardware-ic:hover:before,.hardware-ic.active:before,.hardware-ic.inspected:before{
+  border-color:#ffd0bd;
+  box-shadow:3px 3px 0 #9f4a31,7px 7px 0 #382017,10px 10px 0 rgba(0,0,0,.5);
+}
+.hardware-ic:hover,.hardware-ic.active,.hardware-ic.inspected{
+  border-color:#d97b59;
+  background:#100b09;
+  box-shadow:inset 3px 0 0 #e7835f,4px 4px 0 #17100d!important;
+}
+.hardware-ic .ic-notch,.hardware-ic .pin-one,.hardware-ic .ic-led{display:none}
+.hardware-ic small{margin:0;color:#766b64;font-size:5px}
+.hardware-ic b{margin-top:8px;color:#eee5df;font-size:8px}
+.hardware-ic em{margin-top:7px;color:#9b7d70;font-size:5px}
+.hardware-ic .chip-index{
+  top:8px;right:8px;color:#d17b5d;font-size:6px;
+}
+
+.chip-manifest{left:4%;top:18%;width:142px;height:76px}
+.chip-kernel{left:5%;bottom:20%;width:142px;height:76px}
+.chip-registry{right:4%;top:18%;width:142px;height:76px}
+.chip-receipt{right:4%;bottom:20%;width:142px;height:76px}
+.chip-registry:before,.chip-receipt:before{right:auto;left:-53px}
+.chip-registry:after,.chip-receipt:after{right:auto;left:-42px}
+.chip-settlement{
+  left:50%;bottom:7%;width:142px;height:70px;
+  transform:translateX(-50%);
+}
+.chip-settlement:hover{transform:translateX(-50%)}
+.chip-settlement:before{right:auto;left:-53px}
+.chip-settlement:after{right:auto;left:-42px}
+
+.processor-package{
+  left:50%;top:49%;
+  width:310px;height:172px;
+  overflow:visible;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  transform:translate(-50%,-50%);
+}
+.processor-package:hover,.processor-package.active,.processor-package.inspected{
+  border:0;background:transparent;box-shadow:none!important;
+  transform:translate(-50%,-50%);
+}
+.processor-package:before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:52%;left:112px;
+  width:38px;height:1px;
+  border:0;
+  background:#aa5c43;
+  box-shadow:none;
+}
+.processor-package:after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:25px;right:0;bottom:22px;left:142px;
+  border:1px solid #62483d;
+  background:#0a0807;
+  box-shadow:5px 5px 0 #17100d;
+}
+.processor-package .package-corner{display:none}
+.core-substrate{
+  position:absolute;
+  z-index:3;
+  top:39px;left:20px;
+  width:82px;height:82px;
+  margin:0;
+  border:1px solid #f0a083;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.16),transparent 28%),
+    linear-gradient(315deg,#8e3e2b 0 43%,#dd7653 44% 100%);
+  box-shadow:
+    5px 5px 0 #713522,
+    11px 11px 0 #301b13,
+    15px 15px 0 rgba(0,0,0,.5);
+  transform:rotate(45deg) skew(-3deg,-3deg);
+}
+.core-die{
+  width:54px;height:54px;
+  overflow:visible;
+  border:1px solid #ef9b79;
+  background:#0b0807;
+  transform:rotate(-45deg) skew(3deg,3deg);
+}
+.core-die img{width:48px;height:48px}
+.core-die i{display:none}
+.processor-package small,.processor-package strong,.processor-package em,.processor-package .core-meter{
+  position:absolute;
+  z-index:2;
+  right:13px;
+  width:140px;
+  margin:0;
+  text-align:left;
+}
+.processor-package small{top:42px;color:#766b64;font-size:5px}
+.processor-package strong{top:63px;color:#f0e7e1;font-size:13px}
+.processor-package em{top:88px;color:#c0785e;font-size:6px}
+.processor-package .core-meter{
+  top:111px;height:2px;border-radius:0;background:#30221c;
+}
+.processor-package .core-meter i{width:62%;border-radius:0;background:#e7835f}
+.processor-package.inspected .core-substrate,.processor-package.active .core-substrate{
+  border-color:#ffd1bd;
+  box-shadow:5px 5px 0 #9a4931,11px 11px 0 #3b2117,15px 15px 0 rgba(0,0,0,.55);
+}
+
+.aux-ic{
+  width:88px;height:42px;
+  min-height:0;
+  padding:7px 8px 6px 11px;
+  overflow:visible;
+  border:1px solid #41332d;
+  background:#090706;
+  box-shadow:3px 3px 0 #15100d;
+}
+.aux-ic:before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  top:50%;left:-19px;right:auto;
+  width:13px;height:13px;
+  border:1px solid #bd6548;
+  background:linear-gradient(315deg,#71301f 0 44%,#c86142 45% 100%);
+  box-shadow:2px 2px 0 #402116,4px 4px 0 #120c09;
+  transform:translateY(-62%) rotate(45deg);
+}
+.aux-ic:after{
+  content:"";
+  position:absolute;
+  z-index:3;
+  top:50%;left:-15px;right:auto;
+  width:4px;height:4px;
+  border:0;
+  background:#120c09;
+  box-shadow:0 0 0 1px #dc7957;
+  transform:translateY(-84%) rotate(45deg);
+}
+.aux-ic:hover,.aux-ic.inspected{
+  border-color:#a96149;background:#0f0a08;
+  box-shadow:inset 2px 0 0 #e7835f,3px 3px 0 #15100d;
+}
+.aux-ic small{top:6px;left:10px;color:#645b56}
+.aux-ic b{margin-top:3px;color:#c9bfb8;font-size:6px}
+.aux-ic em{margin-top:4px;color:#76675f}
+.aux-ic .ic-led{display:none}
+
+@media(max-width:1120px){
+  .hardware-ic{width:120px;height:68px;padding:9px}
+  .hardware-ic:before{right:-43px;width:29px;height:29px}
+  .hardware-ic:after{right:-34px;width:10px;height:10px}
+  .chip-registry:before,.chip-receipt:before{right:auto;left:-43px}
+  .chip-registry:after,.chip-receipt:after{right:auto;left:-34px}
+  .processor-package{width:270px;height:160px}
+  .processor-package:after{left:125px}
+  .processor-package:before{left:101px;width:28px}
+  .core-substrate{left:19px;width:72px;height:72px}
+  .processor-package small,.processor-package strong,.processor-package em,.processor-package .core-meter{right:9px;width:128px}
+  .aux-ic{width:76px}
+}
+@media(max-width:600px){
+  .hardware-ic{width:106px;height:64px;padding:8px}
+  .hardware-ic:before{right:-31px;width:22px;height:22px;box-shadow:2px 2px 0 #703321,4px 4px 0 #2b1811}
+  .hardware-ic:after{right:-24px;width:7px;height:7px;box-shadow:0 0 0 2px #c25b3d}
+  .chip-registry:before,.chip-receipt:before{right:auto;left:-31px}
+  .chip-registry:after,.chip-receipt:after{right:auto;left:-24px}
+  .chip-manifest{left:4%;top:15%}.chip-registry{right:4%;top:15%}
+  .chip-kernel{left:4%;bottom:20%}.chip-receipt{right:4%;bottom:20%}
+  .processor-package{width:230px;height:146px}
+  .processor-package:after{top:24px;bottom:20px;left:108px}
+  .processor-package:before{left:86px;width:25px}
+  .core-substrate{top:42px;left:16px;width:58px;height:58px}
+  .core-die{width:39px;height:39px}.core-die img{width:36px;height:36px}
+  .processor-package small,.processor-package strong,.processor-package em,.processor-package .core-meter{right:8px;width:108px}
+  .processor-package strong{font-size:11px}
+  .aux-ic{width:64px;height:38px;padding-left:8px}
+  .aux-ic:before{left:-14px;width:10px;height:10px}.aux-ic:after{display:none}
+}
