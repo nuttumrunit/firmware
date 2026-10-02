@@ -187,29 +187,89 @@
 
     <section class="notes" id="field-notes">
       <div class="label"><span>LAB NOTE 001</span> FROM THE FABRICATION DESK</div>
-      <p class="lead">firmware gives an autonomous machine a way to identify a tool, limit what it can cost, record what happened and settle payment on Solana.</p>
-      <div class="label project"><span>01</span> THE PROBLEM</div>
-      <h2>One task should not require unlimited authority.</h2>
-      <p>An agent may need a price, a report or one approved transaction. It should not need permanent access to an entire wallet or application. A useful capability needs a clear identity, an exact version and a limit that its owner can inspect before use.</p>
-      <p>firmware calls a reusable capability a Chip. A Machine is the account that chooses which Chip to install and who may report work for it. The onchain program does not run private tasks. It records the shared facts that another person should be able to inspect.</p>
-      <div class="label project"><span>02</span> CHIP IDENTITY</div>
-      <p>A publisher creates a Chip under a program derived address. Each published revision has its own artifact digest and manifest digest. Revision numbers advance in order. Existing revisions cannot be silently overwritten, and a publisher can revoke one when necessary.</p>
-      <p>Those digests identify bytes. They do not certify that the bytes are safe. Before installing a Chip, a Machine owner still needs to inspect the manifest, the publisher and the executable package.</p>
-      <div class="label project"><span>03</span> INSTALLATION AND AUTHORITY</div>
-      <p>The owner creates a Machine account and chooses an operator. Installing a Chip pins one revision and its two digests. The installation also records an expiry, one SPL token mint, a maximum cost per job, a rolling window limit and a payment route.</p>
-      <p>The route has three distinct recipients: publisher, executor and protocol. Their shares must total 100 percent. The owner can revoke an installation or change the Machine operator. The operator cannot edit those limits.</p>
-      <div class="label project"><span>04</span> A JOB AND ITS RECEIPT</div>
-      <p>Work can happen away from the public ledger, where private input does not need to be exposed. An authorized operator then submits an invocation identifier, input digest, output digest and measured cost. The program checks the installed revision, expiry, per job ceiling and rolling budget before it creates a receipt.</p>
-      <p>The receipt is unique to that installation and invocation identifier, which prevents the same job from being recorded twice. It identifies the reporter and committed route. It is an attributable statement from an authorized operator, not cryptographic proof that the private computation was correct.</p>
-      <div class="label project"><span>05</span> SETTLEMENT</div>
-      <p>A receipt can be settled only once. The program verifies the payment mint, the Machine controlled token vault and each recipient token account. It computes the committed split and transfers the exact cost through the SPL Token interface. The remaining rounding unit goes to the protocol recipient so the parts always add up.</p>
-      <div class="label project"><span>06</span> WHAT THE SOURCE SHOWS</div>
-      <p>The board above maps each component to the actual Anchor program. Select a Chip to jump to the instruction or account definition responsible for that behavior. The source browser reads repository files at build time; it does not contain a separate handwritten version of the protocol.</p>
-      <p>The program compiles and its unit tests pass in GitHub Actions. The Solana program has not been deployed to a public cluster. The token CA shown in the header is separate from the program ID and does not establish protocol deployment. The current code does not include a hardened private execution sandbox or an independent proof of offchain results. Those boundaries are stated plainly because they matter.</p>
-      <div class="label project"><span>07</span> THE DIRECTION</div>
-      <p>I want the next step to be a real end to end flow: a Machine installs a useful Chip, the job runs under narrow local permissions, the result is reported, and a recipient receives payment. The questions still open are how to verify private work, how to audit the executor and how to make a permission understandable before a user signs it.</p>
-      <p>I would rather have a small system people can inspect and use than a long catalog of capabilities that only sounds impressive. That is the standard I want firmware to meet.</p>
-      <div class="tags"><span>SOLANA</span><span>ANCHOR</span><span>EXPLICIT AUTHORITY</span><span>RECEIPTS</span><span>SPL TOKEN</span></div>
+      <p class="lead">firmware is a way for an autonomous machine to install useful software, understand exactly which revision it selected, limit what that software can cost, record what happened and settle payment through Solana.</p>
+
+      <div class="label project"><span>01</span> THE PROBLEM IN PLAIN LANGUAGE</div>
+      <h2>An agent should not need the keys to everything just to complete one task.</h2>
+      <p>Most agent software still works through broad trust. A model receives access to a wallet, an API key, a browser session or an entire application account. The tool may only need to read one price or submit one transaction, but the surrounding permission is often much larger than the job.</p>
+      <p>That is convenient while everything behaves correctly. It becomes difficult the moment a dependency changes, a prompt is manipulated, a package is replaced or an operator needs to explain where money went. The user can see the final answer, but usually cannot see the exact version of the tool, the authority it received, the amount it could charge or the route used to pay for it.</p>
+      <p>I do not think the answer is to put every calculation onchain. That would expose private work and make ordinary tasks unnecessarily expensive. The better boundary is to keep execution where it makes sense while placing identity, authorization, attribution and settlement in a shared system that other participants can inspect.</p>
+      <p class="plain">firmware separates the ability to perform one job from authority over the entire Machine.</p>
+
+      <div class="label project"><span>02</span> WHAT FIRMWARE IS</div>
+      <p>firmware is an execution protocol built around two objects. A Machine is a Solana account controlled by an owner and associated with a current operator. A Chip is a publisher-owned, versioned capability that performs one understandable job.</p>
+      <p>A Chip might read market data, prepare a report, publish a file, place one approved order or coordinate another narrowly described service. The important part is not how impressive the task sounds. The important part is that its identity, selected revision, cost boundary and accountable operator are visible.</p>
+      <p>Installing a Chip does not transfer ownership of the Machine. The owner pins one immutable revision, its artifact and manifest digests, an expiry, a payment mint, per-job and rolling cost limits, and a three-recipient settlement route. The operator may report work inside those limits, but cannot rewrite them.</p>
+
+      <h3>WHY CALL THE CAPABILITY A CHIP</h3>
+      <p>A normal package tells you which files to download. A plugin usually belongs to one application. A prompt-based skill may describe behavior without creating a durable identity or payment boundary. I use the word Chip because the object is meant to behave more like a component with documented pins.</p>
+      <p>It has an identity derived from its publisher, an ordered revision history, exact artifact and manifest digests, an installation chosen by a Machine owner and a receipt surface that other software can inspect. It can be revoked or replaced without silently becoming the Machine itself.</p>
+
+      <div class="label project"><span>03</span> WHAT AN INSTALLATION CONTAINS</div>
+      <h3>IDENTITY</h3>
+      <p>Every Chip is a program-derived account created from the publisher address and a 32-byte Chip identifier. This gives the capability a deterministic address tied to its publisher. The Chip account stores the latest revision number so new releases must advance in sequence.</p>
+      <h3>REVISION</h3>
+      <p>Each release receives its own Revision PDA derived from the Chip and revision number. It stores a nonzero artifact digest and manifest digest. Because the account address is unique and an initialized Solana account cannot be recreated at the same PDA, an existing revision cannot be silently overwritten. The publisher can revoke a compromised release, but cannot change the bytes its digests represent.</p>
+      <h3>AUTHORITY</h3>
+      <p>The Machine owner chooses an operator and may replace that operator later. Only the owner can create or revoke an installation. The Installation account is bound to the Machine, Chip and selected Revision through Anchor account relationships, while its PDA also includes an owner-chosen installation identifier.</p>
+      <h3>BUDGET</h3>
+      <p>An installation records a maximum cost for one invocation and a maximum total for a time window. The per-job maximum must be positive, the rolling limit cannot be smaller than it, and the window duration must also be positive. When a window expires, accounting begins again from the next accepted receipt. Until then, a receipt that would cross the limit is rejected.</p>
+      <h3>ARTIFACT</h3>
+      <p>The installation copies the chosen Revision's artifact and manifest digests into its own state. Those values identify the offchain package and its declared policy, but a digest is not a safety certificate. The owner still needs to inspect the publisher, manifest and executable bytes before choosing to install them.</p>
+      <h3>ECONOMICS</h3>
+      <p>The owner selects one SPL token mint and three distinct recipients: publisher, executor and protocol. Their basis-point shares must total exactly 10,000. firmware hashes the mint, recipients and shares into a route digest and places that commitment in both the installation and every receipt created from it.</p>
+
+      <div class="label project"><span>04</span> ONE EXECUTION FROM START TO FINISH</div>
+      <p class="plain">The board at the top of this page is a map of this sequence. It is not live telemetry.</p>
+      <p>First, a publisher creates a Chip and publishes sequential revisions. Each revision commits to one artifact digest and one manifest digest. A revoked revision remains visible in history but cannot be used to record new work.</p>
+      <p>Second, an owner creates a Machine PDA and selects an operator. The Machine is the authority behind its SPL token vault. The owner may rotate the operator without changing the Machine address or surrendering ownership.</p>
+      <p>Third, the owner installs one Chip revision. The program rejects an expired installation, a revoked revision, an invalid mint, duplicate payment recipients, malformed revenue shares or budget settings that cannot safely constrain a job.</p>
+      <p>Fourth, the actual task runs offchain. Private prompts, credentials, files and raw output do not need to be written to Solana. The current onchain program does not execute that task; an authorized operator is responsible for running it and measuring its cost.</p>
+      <p>Fifth, the operator submits a unique invocation identifier, input digest, output digest and cost. Anchor verifies the operator relationship and the installation-to-revision relationship. The program then checks active status, revocation, expiry, the per-job ceiling and the rolling budget.</p>
+      <p>Sixth, a new Receipt PDA is created from the Installation and invocation identifier. Reusing the same identifier for that installation resolves to the same address and cannot create a second receipt. The receipt records both digests, cost, reporter, timestamp, route commitment and unsettled state.</p>
+      <p>Finally, settlement verifies the receipt and route, the selected mint, the Machine-controlled vault and the owner of every recipient token account. The Machine PDA signs three checked SPL token transfers. The receipt is marked settled in the same atomic transaction, so a failed transfer cannot leave a partially paid result.</p>
+
+      <div class="label project"><span>05</span> WHERE SOLANA FITS</div>
+      <h2>The chain coordinates shared facts. It does not need to perform the private work.</h2>
+      <p>Solana gives firmware deterministic accounts for Chip identity, immutable revision slots, Machine authority, installations and unique receipts. PDA seeds make those relationships discoverable without relying on a private database to decide which record is canonical.</p>
+      <p>Anchor expresses the account graph directly. Signer requirements, <code>has_one</code> relationships, PDA seeds, token mints and token authorities are checked before an instruction reaches its business logic. The program still performs explicit validation for expiry, revision state, budgets, routes, balances and arithmetic.</p>
+      <p>Private inputs and executable bytes do not automatically belong on a public ledger. Only their digests and the facts needed for coordination are stored onchain. That preserves a boundary between private execution and public identity, attribution, budgeting and settlement.</p>
+      <p>Settlement uses the SPL Token interface rather than an internal balance table. The Machine PDA controls the vault, recipient accounts must match the committed owners and mint, and <code>transfer_checked</code> applies the mint's decimals to each transfer.</p>
+
+      <div class="label project"><span>06</span> THE CORE ACCOUNTS</div>
+      <h3>CHIP</h3>
+      <p>The Chip account stores its publisher, stable identifier and latest revision number. Only that publisher can append a revision or revoke one belonging to the Chip. Sequential numbering prevents gaps and makes the release history straightforward to audit.</p>
+      <h3>REVISION</h3>
+      <p>A Revision stores the exact artifact and manifest digests plus its revocation state. It says which bytes were named by a release; it does not claim that those bytes are harmless, audited or available forever.</p>
+      <h3>MACHINE</h3>
+      <p>The Machine account separates owner authority from operator activity. The owner chooses installations and may rotate the operator. The operator can record receipts and therefore must be treated as a real trust boundary, but it cannot change installation limits or redirect the committed route.</p>
+      <h3>INSTALLATION</h3>
+      <p>The Installation is the policy record. It pins the Machine, Chip, Revision, digests, expiry, mint, cost limits, rolling window and settlement recipients. Revocation disables future receipt creation without erasing the history already written.</p>
+      <h3>RECEIPT</h3>
+      <p>A Receipt is an attributable record, not a magical proof that every private calculation was correct. It answers a narrower set of useful questions: which installation reported the job, which input and output digests were committed, who reported it, when it was recorded, what it cost and whether it has been settled.</p>
+      <h3>SPL TOKEN SETTLEMENT</h3>
+      <p>Publisher and executor shares are calculated in integer basis points and rounded down. The remaining units go to the protocol recipient so the three transfers always add back to the exact receipt cost. Any caller may submit the settlement transaction, but only the Machine PDA can authorize spending from its vault.</p>
+
+      <div class="label project"><span>07</span> WHAT EXISTS TODAY</div>
+      <p>This repository contains the Anchor program, account definitions, error conditions, unit tests, CI workflow and the website reading from those real source files. The implementation covers Chip creation, ordered publication, revision revocation, Machine ownership, operator rotation, bounded installation, receipt recording, replay resistance through unique PDAs and one-time SPL token settlement.</p>
+      <p>The code browser above is generated from checked-in project files rather than a second set of presentation snippets. Selecting a component on the board opens the actual Rust symbol responsible for that behavior. Site tests verify every board mapping and confirm that the embedded program source matches the repository byte for byte.</p>
+      <p>The Rust workspace compiles and its unit tests run in GitHub Actions. Host compilation is not the same as an SBF deployment test, and no public cluster deployment is claimed. The token CA shown in the header is separate from the program ID and does not prove that this protocol program is deployed.</p>
+
+      <div class="label project"><span>08</span> THE SECURITY BOUNDARY</div>
+      <p>The onchain program can prove that the expected accounts signed, that their relationships match, that a revision was active, that declared cost stayed inside its limits and that settlement followed the committed token route. It cannot inspect a private process or determine whether an offchain result is true.</p>
+      <p>An operator compromise can create false receipts and charge the Machine vault up to the owner's configured limits. Revoking the operator, installation or revision stops future receipts, but a valid receipt already recorded onchain remains eligible for settlement. Those are deliberate and visible trust assumptions, not hidden guarantees.</p>
+      <p>The rolling budget limits operator-reported receipt cost. It does not constrain every external resource an offchain process might touch. A production executor still needs a hardened sandbox, authenticated artifact retrieval, key isolation, monitoring and an independent review of the program.</p>
+      <p>Solana transaction atomicity protects the settlement sequence: if any checked transfer fails, the transaction and settled flag both roll back. Arithmetic uses checked operations, receipt reuse is blocked by PDA uniqueness and recipient token accounts are constrained to the selected mint and committed owners.</p>
+
+      <div class="label project"><span>09</span> QUESTIONS I AM STILL WORKING THROUGH</div>
+      <p>How should a Machine evaluate an offchain result when an operator-signed receipt is not enough? Which evidence can make private work challengeable without publishing the private input? How should artifact availability and reproducible builds be proven after a digest has been pinned?</p>
+      <p>How should an owner understand a rolling budget before signing an installation? When should an already-recorded receipt remain payable after emergency revocation? How should multiple executors compete, fail over and build reputation without turning the protocol into another closed marketplace?</p>
+      <p>I do not want to hide those questions behind a broad roadmap. They are part of the design. The program, account constraints, tests and limitations are published together so each claim can be checked against what exists.</p>
+
+      <div class="label project"><span>10</span> THE DIRECTION</div>
+      <p>The next meaningful step is a real end-to-end flow on Solana: a Machine owner reviews and installs a useful Chip, a hardened local executor runs it under narrow permissions, the result is committed, and SPL token payment reaches the exact recipients selected at installation.</p>
+      <p>After that comes the work that makes the system credible rather than merely functional: SBF and local-validator integration tests, public-cluster deployment, program verification, external security review, artifact distribution, executor isolation and tools that translate account state into language a user can understand before approving it.</p>
+      <p>I would rather have a small system people can inspect and use than a long catalog of capabilities that only sounds impressive. The long-term idea is simple even if it is difficult to build: software agents should be able to acquire useful capabilities without receiving unlimited authority, and the people around those agents should be able to understand what was authorized after the work is done.</p>      <div class="tags"><span>SOLANA</span><span>ANCHOR</span><span>EXPLICIT AUTHORITY</span><span>RECEIPTS</span><span>SPL TOKEN</span></div>
       <p class="signature">firmware lab note 001 / written from the implementation / September 2026</p>
     </section>
   </aside>
