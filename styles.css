@@ -834,7 +834,35 @@ body:before{
   background:#0b0807;
   transform:rotate(-45deg) skew(3deg,3deg);
 }
-.core-die img{width:48px;height:48px}
+.core-die{
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,transparent 47%,rgba(231,131,95,.18) 48% 52%,transparent 53%),
+    linear-gradient(transparent 47%,rgba(231,131,95,.18) 48% 52%,transparent 53%),
+    #090706;
+  box-shadow:inset 0 0 0 1px #2e1c16,inset 0 0 16px #000;
+}
+.core-die:before{
+  content:"";
+  position:absolute;
+  inset:8px;
+  display:block;
+  border:1px solid #8c4c38;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 5px,rgba(231,131,95,.3) 5px 6px),
+    repeating-linear-gradient(0deg,transparent 0 5px,rgba(231,131,95,.22) 5px 6px),
+    #120c09;
+  box-shadow:0 0 0 3px #090706,0 0 0 4px #3e251c;
+}
+.core-die:after{
+  content:"";
+  position:absolute;
+  inset:17px;
+  border:1px solid #d87856;
+  background:#170d09;
+  box-shadow:inset 0 0 0 2px #090706,0 0 9px rgba(231,131,95,.18);
+}
 .core-die i{display:none}
 .processor-package small,.processor-package strong,.processor-package em,.processor-package .core-meter{
   position:absolute;
