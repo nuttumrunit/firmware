@@ -34,7 +34,7 @@ test("source browser embeds the checked-in program exactly", () => {
 
 test("public page contains no prior chain or signature claims", () => {
   assert.doesNotMatch(html, /Robinhood|EIP.712|ERC.1271|EVM|\.sol\b/i);
-  assert.match(html, /<code title="Token contract address to be announced">TBA<\/code>/);
+  assert.match(html, /Ejp4V8Va13JHMCVrZqZLik92hH3f3q3qbTA2TvxYpump/);
   assert.doesNotMatch(html, /F8XJnif9YTTV7fxZzGsp9KZdUkaC6n2cjArejj8Ypump/);
   assert.match(html, /Solana/);
 });
